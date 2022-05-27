@@ -65,7 +65,7 @@ impl<T> HandleMap<T> {
     }
 
     /// Gets a mutable reference to a value in the map.
-    pub fn get_mut(&mut self, handle: &Handle) -> Option<&mut T> {
+    pub fn get_mut<'a>(&'a mut self, handle: &Handle) -> Option<&'a mut T> {
         let v = self.values[handle.index].as_mut();
         if let Some((unique, value)) = v {
             if unique == &handle.unique {

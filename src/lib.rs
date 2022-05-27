@@ -3,8 +3,8 @@
 
 pub mod class;
 pub mod handle_map;
+pub(crate) mod unique;
 pub mod node;
-pub mod unique;
 pub mod universe;
 
 #[cfg(test)]

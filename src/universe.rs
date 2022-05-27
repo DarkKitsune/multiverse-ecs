@@ -11,14 +11,16 @@ use crate::{
 pub struct Universe {
     /// The nodes in the universe
     nodes: HandleMap<Node>,
+    roots: Vec<Handle>,
 }
 
 impl Universe {
     /// Creates a new universe.
     pub fn new() -> Self {
         let mut nodes = HandleMap::new();
+        let roots = Vec::new();
 
-        Universe { nodes }
+        Universe { nodes, roots }
     }
 
     /// Creates a new node in the universe. Returns the node's unique Handle.
@@ -39,6 +41,9 @@ impl Universe {
                 .unwrap()
                 .__push_child_handle(node_handle.clone());
         }
+        else {
+            self.roots.push(node_handle.clone());
+        }
         node_handle
     }
 
@@ -50,6 +55,41 @@ impl Universe {
     /// Find a node in the Universe by its handle.
     pub fn node_mut(&mut self, handle: &Handle) -> Option<&mut Node> {
         self.nodes.get_mut(handle)
+    }
+
+    /// Returns an iterator over the nodes with the given handles.
+    pub fn nodes_with_handles<'a>(&'a self, handles: &'a [Handle]) -> impl Iterator<Item = Option<&'a Node>> {
+        handles.iter().map(|handle| self.nodes.get(handle))
+    }
+
+    /// Calls the given function on the nodes with the given handles.
+    pub fn using_nodes_with_handles<'a, R, F: FnMut(Option<&'a Node>) -> R + 'a>(&'a self, handles: &'a [Handle], mut f: F) -> impl Iterator<Item = R> + 'a {
+        handles.iter().map(move |handle| f(self.nodes.get(handle)))
+    }
+
+    /// Calls the given function on the nodes with the given handles.
+    pub fn using_nodes_with_handles_mut<R, F: FnMut(Option<&mut Node>) -> R>(&mut self, handles: &[Handle], mut f: F) -> Vec<R> {
+        let mut results = Vec::new();
+        for handle in handles {
+            results.push(f(self.nodes.get_mut(handle)));
+        }
+        results
+    }
+    
+    /// Returns a slice containing the handles of the root nodes in the universe (nodes with no parent).
+    pub fn root_node_handles(&self) -> &[Handle] {
+        &self.roots
+    }
+
+    /// Calls the given function on the root nodes in the universe.
+    pub fn using_root_nodes<'a, R: 'a, F: FnMut(Option<&'a Node>) -> R + 'a>(&'a self, f: F) -> impl Iterator<Item = R> + 'a {
+        self.using_nodes_with_handles(self.root_node_handles(), f)
+    }
+
+    /// Calls the given function on the root nodes in the universe.
+    pub fn using_root_nodes_mut<R, F: FnMut(Option<&mut Node>) -> R>(&mut self, f: F) -> Vec<R> {
+        let handles = self.root_node_handles().to_owned();
+        self.using_nodes_with_handles_mut(&handles, f)
     }
 
     /// Returns whether the universe contains a node with the given handle.
