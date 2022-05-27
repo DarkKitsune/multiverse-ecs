@@ -64,6 +64,16 @@ impl Node {
         &*self.class
     }
 
+    /// Returns the class object of this node.
+    pub fn class_as<T: Class>(&self) -> Option<&T> {
+        self.class.as_any().downcast_ref::<T>()
+    }
+
+    /// Returns the class object of this node.
+    pub fn class_as_mut<T: Class>(&mut self) -> Option<&mut T> {
+        self.class.as_any_mut().downcast_mut::<T>()
+    }
+
     /// Returns whether the node has the given type of class
     pub fn class_is<T: Class>(&self) -> bool {
         self.class.as_any().is::<T>()
