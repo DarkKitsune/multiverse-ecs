@@ -147,3 +147,83 @@ impl<'a, I: Iterator<Item = &'a Node>> Iterator for NodesToHandles<'a, I> {
         self.iter.next().map(|node| node.handle())
     }
 }
+
+pub trait NodesIterMut<'a>: Sized + Iterator<Item = &'a mut Node> {
+    /// Filter the iterator to only include nodes with the given class.
+    fn with_class<C: Class>(self) -> NodesWithClassMut<'a, Self, C>;
+    /// Filter the iterator to only include nodes with the given component.
+    fn with_component<C>(self) -> NodesWithComponentMut<'a, Self, C>;
+    /// Retrieve the handles of the nodes this iterator yields.
+    fn handles(self) -> NodesToHandlesMut<'a, Self>;
+}
+
+impl<'a, I: Iterator<Item = &'a mut Node>> NodesIterMut<'a> for I {
+    fn with_class<C: Class>(self) -> NodesWithClassMut<'a, I, C> {
+        NodesWithClassMut {
+            iter: self,
+            __marker: PhantomData,
+        }
+    }
+
+    fn with_component<C>(self) -> NodesWithComponentMut<'a, Self, C> {
+        NodesWithComponentMut {
+            iter: self,
+            __marker: PhantomData,
+        }
+    }
+
+    fn handles(self) -> NodesToHandlesMut<'a, Self> {
+        NodesToHandlesMut { iter: self }
+    }
+}
+
+/// An iterator over nodes in a universe, filtered to a specific class.
+pub struct NodesWithClassMut<'a, I: Iterator<Item = &'a mut Node>, C: Class + 'a> {
+    iter: I,
+    __marker: std::marker::PhantomData<C>,
+}
+
+impl<'a, I: Iterator<Item = &'a mut Node>, C: Class + 'a> Iterator for NodesWithClassMut<'a, I, C> {
+    type Item = &'a Node;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(node) = self.iter.next() {
+            if node.class_is::<C>() {
+                return Some(node);
+            }
+        }
+        None
+    }
+}
+
+/// An iterator over nodes in a universe, filtered to a specific component.
+pub struct NodesWithComponentMut<'a, I: Iterator<Item = &'a mut Node>, C: 'static> {
+    iter: I,
+    __marker: std::marker::PhantomData<C>,
+}
+
+impl<'a, I: Iterator<Item = &'a mut Node>, C: 'static> Iterator for NodesWithComponentMut<'a, I, C> {
+    type Item = &'a mut Node;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while let Some(node) = self.iter.next() {
+            if let Some(component) = node.component::<C>() {
+                return Some(node);
+            }
+        }
+        None
+    }
+}
+
+/// An iterator over handles of nodes in a universe.
+pub struct NodesToHandlesMut<'a, I: Iterator<Item = &'a mut Node>> {
+    iter: I,
+}
+
+impl<'a, I: Iterator<Item = &'a mut Node>> Iterator for NodesToHandlesMut<'a, I> {
+    type Item = &'a Handle;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|node| node.handle())
+    }
+}
