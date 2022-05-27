@@ -65,3 +65,13 @@ impl Class for () {
         None
     }
 }
+
+pub trait ClassDynComponent {
+    fn component<C: 'static>(&self) -> Option<&C>;
+}
+
+impl<T: Class> ClassDynComponent for T {
+    fn component<C: 'static>(&self) -> Option<&C> {
+        Class::component(self, TypeId::of::<C>()).map(|c| c.downcast_ref().unwrap())
+    }
+}
