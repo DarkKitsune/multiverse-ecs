@@ -12,12 +12,6 @@ pub trait Class: AsAny {
     fn component_mut(&mut self, type_id: TypeId) -> Option<&mut dyn Any>;
 }
 
-pub trait __DuplicateComponent {}
-pub struct __DuplicateComponentAt<Class, T> {
-    __marker: PhantomData<Class>,
-    __marker2: PhantomData<T>,
-}
-
 #[macro_export]
 macro_rules! define_class {
     ($(
@@ -39,6 +33,7 @@ macro_rules! define_class {
                 }
 
                 fn component(&self, type_id: std::any::TypeId) -> Option<&dyn std::any::Any> {
+                    #[allow(unreachable_patterns)]
                     match type_id {
                         $(const { std::any::TypeId::of::<$type>() } => Some(&self.$field as &dyn std::any::Any),)*
                         _ => None,
@@ -46,14 +41,13 @@ macro_rules! define_class {
                 }
 
                 fn component_mut(&mut self, type_id: std::any::TypeId) -> Option<&mut dyn std::any::Any> {
+                    #[allow(unreachable_patterns)]
                     match type_id {
                         $(const { std::any::TypeId::of::<$type>() } => Some(&mut self.$field as &mut dyn std::any::Any),)*
                         _ => None,
                     }
                 }
             }
-
-            $(impl $crate::class::__DuplicateComponent for $crate::class::__DuplicateComponentAt<$name, $type> {})*
         )*
     };
 }
