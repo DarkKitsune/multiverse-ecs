@@ -1,35 +1,17 @@
+#![allow(incomplete_features)]
 #![feature(inline_const_pat)]
 #![feature(const_type_id)]
 
 pub mod class;
-pub mod handle_map;
-pub(crate) mod unique;
 pub mod node;
 pub mod universe;
 
 #[cfg(test)]
 mod tests {
-    use std::convert::identity;
-
     use crate::{
         define_class,
-        unique::Unique,
-        universe::{NodesIter, Universe},
+        universe::{Universe, NodesIter},
     };
-
-    #[test]
-    fn unique() {
-        // Create two unique handles
-        let unique1 = Unique::new();
-        let unique2 = Unique::new();
-        // Assert that the handles are equal to themselves
-        assert_eq!(unique1, unique1);
-        assert_eq!(unique2, unique2);
-        // Assert that a handle is equal to its clone
-        assert_eq!(unique1, unique1.clone());
-        // Assert that two individually created handles are not equal
-        assert_ne!(unique1, unique2);
-    }
 
     #[test]
     fn node_lookup() {

@@ -3,7 +3,9 @@ use std::{
     fmt::Debug,
 };
 
-use crate::{class::Class, handle_map::Handle};
+use ggutil::prelude::*;
+
+use crate::class::Class;
 
 pub struct Node {
     handle: Option<Handle>,

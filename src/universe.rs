@@ -1,8 +1,9 @@
 use std::marker::PhantomData;
 
+use ggutil::prelude::*;
+
 use crate::{
     class::Class,
-    handle_map::{Handle, HandleMap, HandleMapValues, HandleMapValuesMut},
     node::Node,
 };
 
