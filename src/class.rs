@@ -1,7 +1,5 @@
 use std::{
     any::{Any, TypeId},
-    fmt::Debug,
-    marker::PhantomData,
 };
 
 use as_any::AsAny;

@@ -18,7 +18,7 @@ pub struct Universe {
 impl Universe {
     /// Creates a new universe.
     pub fn new() -> Self {
-        let mut nodes = HandleMap::new();
+        let nodes = HandleMap::new();
         let roots = Vec::new();
 
         Universe { nodes, roots }
@@ -248,7 +248,7 @@ impl<'a, I: Iterator<Item = &'a mut Node>, C: 'static> Iterator for NodesWithCom
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(node) = self.iter.next() {
-            if let Some(component) = node.component::<C>() {
+            if node.component::<C>().is_some() {
                 return Some(node);
             }
         }
