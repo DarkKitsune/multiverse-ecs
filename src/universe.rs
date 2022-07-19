@@ -2,10 +2,7 @@ use std::marker::PhantomData;
 
 use ggutil::prelude::*;
 
-use crate::{
-    class::Class,
-    node::Node,
-};
+use crate::{class::Class, node::Node};
 
 /// A universe which contains any number of nodes.
 #[derive(Debug)]
@@ -41,11 +38,40 @@ impl Universe {
                 .get_mut(parent_handle)
                 .unwrap()
                 .__push_child_handle(node_handle.clone());
-        }
-        else {
+        } else {
             self.roots.push(node_handle.clone());
         }
         node_handle
+    }
+
+    /// Changes a node's parent.
+    /// Returns the node's old parent's unique Handle, if it had one.
+    pub fn change_parent(
+        &mut self,
+        node_handle: &Handle,
+        new_parent_handle: Option<&Handle>,
+    ) -> Option<Handle> {
+        let old_parent_handle = self
+            .node(node_handle)
+            .expect("No node pointed to by this handle to change the parent of")
+            .parent()
+            .cloned();
+        if let Some(old_parent_handle) = &old_parent_handle {
+            self.nodes
+                .get_mut(old_parent_handle)
+                .unwrap()
+                .__remove_child_handle(node_handle);
+        }
+        if let Some(new_parent_handle) = new_parent_handle {
+            self.nodes
+                .get_mut(new_parent_handle)
+                .unwrap()
+                .__push_child_handle(node_handle.clone());
+        }
+        self.node_mut(node_handle)
+            .expect("No node pointed to by this handle to change the parent of")
+            .__set_parent_handle(new_parent_handle);
+        old_parent_handle
     }
 
     /// Find a node in the Universe by its unique handle.
@@ -59,31 +85,45 @@ impl Universe {
     }
 
     /// Returns an iterator over the nodes with the given handles.
-    pub fn nodes_with_handles<'a>(&'a self, handles: &'a [Handle]) -> impl Iterator<Item = Option<&'a Node>> {
+    pub fn nodes_with_handles<'a>(
+        &'a self,
+        handles: &'a [Handle],
+    ) -> impl Iterator<Item = Option<&'a Node>> {
         handles.iter().map(|handle| self.nodes.get(handle))
     }
 
     /// Calls the given function on the nodes with the given handles.
-    pub fn using_nodes_with_handles<'a, R, F: FnMut(Option<&'a Node>) -> R + 'a>(&'a self, handles: &'a [Handle], mut f: F) -> impl Iterator<Item = R> + 'a {
+    pub fn using_nodes_with_handles<'a, R, F: FnMut(Option<&'a Node>) -> R + 'a>(
+        &'a self,
+        handles: &'a [Handle],
+        mut f: F,
+    ) -> impl Iterator<Item = R> + 'a {
         handles.iter().map(move |handle| f(self.nodes.get(handle)))
     }
 
     /// Calls the given function on the nodes with the given handles.
-    pub fn using_nodes_with_handles_mut<R, F: FnMut(Option<&mut Node>) -> R>(&mut self, handles: &[Handle], mut f: F) -> Vec<R> {
+    pub fn using_nodes_with_handles_mut<R, F: FnMut(Option<&mut Node>) -> R>(
+        &mut self,
+        handles: &[Handle],
+        mut f: F,
+    ) -> Vec<R> {
         let mut results = Vec::new();
         for handle in handles {
             results.push(f(self.nodes.get_mut(handle)));
         }
         results
     }
-    
+
     /// Returns a slice containing the handles of the root nodes in the universe (nodes with no parent).
     pub fn root_node_handles(&self) -> &[Handle] {
         &self.roots
     }
 
     /// Calls the given function on the root nodes in the universe.
-    pub fn using_root_nodes<'a, R: 'a, F: FnMut(Option<&'a Node>) -> R + 'a>(&'a self, f: F) -> impl Iterator<Item = R> + 'a {
+    pub fn using_root_nodes<'a, R: 'a, F: FnMut(Option<&'a Node>) -> R + 'a>(
+        &'a self,
+        f: F,
+    ) -> impl Iterator<Item = R> + 'a {
         self.using_nodes_with_handles(self.root_node_handles(), f)
     }
 
@@ -243,7 +283,9 @@ pub struct NodesWithComponentMut<'a, I: Iterator<Item = &'a mut Node>, C: 'stati
     __marker: std::marker::PhantomData<C>,
 }
 
-impl<'a, I: Iterator<Item = &'a mut Node>, C: 'static> Iterator for NodesWithComponentMut<'a, I, C> {
+impl<'a, I: Iterator<Item = &'a mut Node>, C: 'static> Iterator
+    for NodesWithComponentMut<'a, I, C>
+{
     type Item = &'a mut Node;
 
     fn next(&mut self) -> Option<Self::Item> {

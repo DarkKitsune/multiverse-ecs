@@ -10,7 +10,7 @@ pub mod universe;
 mod tests {
     use crate::{
         define_class,
-        universe::{Universe, NodesIter},
+        universe::{NodesIter, Universe},
     };
 
     #[test]
@@ -37,8 +37,22 @@ mod tests {
         // Assert that node 2 has node 3 and node 4 as its only children
         assert_eq!(
             universe.node(&node_handle2).unwrap().children(),
-            &[node_handle3, node_handle4]
+            &[node_handle3.clone(), node_handle4]
         );
+        // Change node 2's parent to node 3
+        universe.change_parent(&node_handle2, Some(&node_handle3));
+        // Assert that node 2 has node 3 as its parent
+        assert_eq!(
+            universe.node(&node_handle2).unwrap().parent(),
+            Some(&node_handle3)
+        );
+        // Assert that node 3 has node 2 as its only child
+        assert_eq!(
+            universe.node(&node_handle3).unwrap().children(),
+            &[node_handle2]
+        );
+        // Assert that node 1 has no children
+        assert_eq!(universe.node(&node_handle1).unwrap().children(), &[]);
     }
 
     #[test]

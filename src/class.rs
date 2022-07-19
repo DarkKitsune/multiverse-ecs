@@ -1,6 +1,4 @@
-use std::{
-    any::{Any, TypeId},
-};
+use std::any::{Any, TypeId};
 
 use as_any::AsAny;
 

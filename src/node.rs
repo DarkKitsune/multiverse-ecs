@@ -1,7 +1,4 @@
-use std::{
-    any::TypeId,
-    fmt::Debug,
-};
+use std::{any::TypeId, fmt::Debug};
 
 use ggutil::prelude::*;
 
@@ -30,6 +27,16 @@ impl Node {
 
     pub(crate) fn __push_child_handle(&mut self, handle: Handle) {
         self.children_handles.push(handle);
+    }
+
+    pub(crate) fn __remove_child_handle(&mut self, handle: &Handle) {
+        if let Some(index) = self.children_handles.iter().position(|h| h == handle) {
+            self.children_handles.remove(index);
+        }
+    }
+
+    pub(crate) fn __set_parent_handle(&mut self, handle: Option<&Handle>) {
+        self.parent_handle = handle.cloned();
     }
 
     /// Returns the handle of this node's parent, if it has one.
