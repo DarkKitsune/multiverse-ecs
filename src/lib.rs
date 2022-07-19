@@ -17,40 +17,50 @@ mod tests {
     fn node_lookup() {
         // Create a universe
         let mut universe = Universe::new();
+
         // Create node 1
         let node_handle1 = universe.create_node(None, ());
+
         // Create node 2 as a child node for node 1
         let node_handle2 = universe.create_node(Some(&node_handle1), ());
+        
         // Create 2 children nodes for node 2
         let node_handle3 = universe.create_node(Some(&node_handle2), ());
         let node_handle4 = universe.create_node(Some(&node_handle2), ());
+
         // Assert that node 2 has node 1 as its parent
         assert_eq!(
             universe.node(&node_handle2).unwrap().parent(),
             Some(&node_handle1)
         );
+
         // Assert that node 1 has node 2 as its only child
         assert_eq!(
             universe.node(&node_handle1).unwrap().children(),
             &[node_handle2.clone()]
         );
+
         // Assert that node 2 has node 3 and node 4 as its only children
         assert_eq!(
             universe.node(&node_handle2).unwrap().children(),
             &[node_handle3.clone(), node_handle4]
         );
+
         // Change node 2's parent to node 3
         universe.change_parent(&node_handle2, Some(&node_handle3));
+
         // Assert that node 2 has node 3 as its parent
         assert_eq!(
             universe.node(&node_handle2).unwrap().parent(),
             Some(&node_handle3)
         );
+
         // Assert that node 3 has node 2 as its only child
         assert_eq!(
             universe.node(&node_handle3).unwrap().children(),
             &[node_handle2]
         );
+
         // Assert that node 1 has no children
         assert_eq!(universe.node(&node_handle1).unwrap().children(), &[]);
     }
@@ -62,6 +72,7 @@ mod tests {
         struct Name(String);
         #[derive(Debug, PartialEq)]
         struct Age(u32);
+
         // Define some classes of components
         define_class! {
             class Cat {
@@ -74,8 +85,10 @@ mod tests {
                 age: Age,
             }
         }
+
         // Create a universe
         let mut universe = Universe::new();
+
         // Create a cat node
         let cat_node_handle = universe.create_node(
             None,
@@ -84,6 +97,7 @@ mod tests {
                 age: Age(5),
             },
         );
+
         // Create two dog nodes
         let dog_node_handle1 = universe.create_node(
             None,
@@ -92,6 +106,7 @@ mod tests {
                 age: Age(3),
             },
         );
+
         let dog_node_handle2 = universe.create_node(
             None,
             Dog {
@@ -99,16 +114,19 @@ mod tests {
                 age: Age(5),
             },
         );
+
         // Assert that the cat node has a Name component
         assert_eq!(
             universe.node(&cat_node_handle).unwrap().component::<Name>(),
             Some(&Name("Garfield".to_string()))
         );
+
         // Assert that the cat node has an Age component
         assert_eq!(
             universe.node(&cat_node_handle).unwrap().component::<Age>(),
             Some(&Age(5))
         );
+
         // Test search the universe for nodes with a Name component
         assert_eq!(
             universe
@@ -119,6 +137,7 @@ mod tests {
                 .collect::<Vec<_>>(),
             &[&cat_node_handle, &dog_node_handle1, &dog_node_handle2]
         );
+
         // Test search the universe for nodes with a name of "Odie"
         assert_eq!(
             universe
@@ -129,6 +148,7 @@ mod tests {
                 .collect::<Vec<_>>(),
             &[&dog_node_handle1]
         );
+
         // Test search the universe for dog nodes
         assert_eq!(
             universe
@@ -138,6 +158,7 @@ mod tests {
                 .collect::<Vec<_>>(),
             &[&dog_node_handle1, &dog_node_handle2]
         );
+
         // Test search the universe for dog nodes with an age of 5
         assert_eq!(
             universe
