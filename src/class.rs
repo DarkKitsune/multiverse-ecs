@@ -12,18 +12,18 @@ pub trait Class: AsAny {
 macro_rules! define_class {
     ($(
         $(#[$outer:meta])*
-        $pub:vis class $name:ident {
-            $($field:ident: $type:ty),*
+        $pub:vis class $name:ident$(<$($lifetime:lifetime,)*$($generic:ident$(:$bound:tt$(+$add_bound:tt)*)?),*>)? {
+            $($(#[$field_outer:meta])*$field:ident: $type:ty),*
             $(,)?
         }
     )*) => {
         $(
             $(#[$outer])*
-            $pub struct $name {
-                $($field: $type),*
+            $pub struct $name$(<$($lifetime,)*$($generic$(:$bound$(+$add_bound)*)?),*>)? {
+                $($(#[$field_outer])*$field: $type),*
             }
 
-            impl $crate::class::Class for $name {
+            impl$(<$($lifetime,)*$($generic$(:$bound$(+$add_bound)*)?),*>)? $crate::class::Class for $name$(<$($lifetime,)*$($generic),*>)? {
                 fn name(&self) -> &'static str {
                     stringify!($name)
                 }

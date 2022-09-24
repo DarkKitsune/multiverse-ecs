@@ -265,7 +265,7 @@ pub struct NodesWithClassMut<'a, I: Iterator<Item = &'a mut Node>, C: Class + 'a
 }
 
 impl<'a, I: Iterator<Item = &'a mut Node>, C: Class + 'a> Iterator for NodesWithClassMut<'a, I, C> {
-    type Item = &'a Node;
+    type Item = &'a mut Node;
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(node) = self.iter.next() {
