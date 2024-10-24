@@ -107,3 +107,15 @@ impl PartialEq for Node {
 }
 
 impl Eq for Node {}
+
+impl Into<Handle> for Node {
+    fn into(self) -> Handle {
+        self.handle.expect("Handle not set!")
+    }
+}
+
+impl Into<Handle> for &Node {
+    fn into(self) -> Handle {
+        self.handle.as_ref().expect("Handle not set!").clone()
+    }
+}
