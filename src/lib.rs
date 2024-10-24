@@ -23,7 +23,7 @@ mod tests {
 
         // Create node 2 as a child node for node 1
         let node_handle2 = universe.create_node(Some(&node_handle1), ());
-        
+
         // Create 2 children nodes for node 2
         let node_handle3 = universe.create_node(Some(&node_handle2), ());
         let node_handle4 = universe.create_node(Some(&node_handle2), ());

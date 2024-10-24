@@ -29,19 +29,21 @@ macro_rules! define_class {
                 }
 
                 fn component(&self, type_id: std::any::TypeId) -> Option<&dyn std::any::Any> {
-                    #[allow(unreachable_patterns)]
-                    match type_id {
-                        $(const { std::any::TypeId::of::<$type>() } => Some(&self.$field as &dyn std::any::Any),)*
-                        _ => None,
-                    }
+                    $(
+                        if type_id == std::any::TypeId::of::<$type>() {
+                            return Some(&self.$field as &dyn std::any::Any);
+                        }
+                    )*
+                    None
                 }
 
                 fn component_mut(&mut self, type_id: std::any::TypeId) -> Option<&mut dyn std::any::Any> {
-                    #[allow(unreachable_patterns)]
-                    match type_id {
-                        $(const { std::any::TypeId::of::<$type>() } => Some(&mut self.$field as &mut dyn std::any::Any),)*
-                        _ => None,
-                    }
+                    $(
+                        if type_id == std::any::TypeId::of::<$type>() {
+                            return Some(&mut self.$field as &mut dyn std::any::Any);
+                        }
+                    )*
+                    None
                 }
             }
         )*
