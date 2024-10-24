@@ -4,6 +4,7 @@
 
 pub mod class;
 pub mod node;
+pub mod prelude;
 pub mod universe;
 
 #[cfg(test)]
