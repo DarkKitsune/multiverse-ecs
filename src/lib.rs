@@ -1,5 +1,4 @@
 #![allow(incomplete_features)]
-#![feature(inline_const_pat)]
 #![feature(const_type_id)]
 
 pub mod class;

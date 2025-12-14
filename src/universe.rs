@@ -139,12 +139,12 @@ impl Universe {
     }
 
     /// Returns an iterator over all the nodes in the universe.
-    pub fn nodes(&self) -> HandleMapValues<Node> {
+    pub fn nodes(&self) -> HandleMapValues<'_, Node> {
         self.nodes.values()
     }
 
     /// Returns an iterator over all the nodes in the universe.
-    pub fn nodes_mut(&mut self) -> HandleMapValuesMut<Node> {
+    pub fn nodes_mut(&mut self) -> HandleMapValuesMut<'_, Node> {
         self.nodes.values_mut()
     }
 }
